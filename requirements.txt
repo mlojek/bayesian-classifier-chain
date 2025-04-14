@@ -1,0 +1,13 @@
+# machine learning
+scikit-learn
+scikit-multilearn
+optuna
+
+# static code analysis
+black
+isort
+pylint
+
+# documentation
+sphinx
+sphinx-rtd-theme
