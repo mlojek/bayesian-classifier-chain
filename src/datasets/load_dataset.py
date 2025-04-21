@@ -1,9 +1,6 @@
-
-
-
-'''
-Load youtube deepwalk multilabel classification dataset.
-'''
+"""
+Load multilabel classification datasets.
+"""
 
 import bz2
 import io
@@ -15,30 +12,37 @@ from sklearn.datasets import load_svmlight_file
 from sklearn.utils import Bunch
 from tqdm import tqdm
 
-# Setup logger
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
 )
 logger = logging.getLogger(__name__)
 
+YOUTUBE_DATASET_URL = (
+    "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/"
+    "datasets/multilabel/youtube_deepwalk.svm.bz2"
+)
 BIBTEX_DATASET_URL = (
     "https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/multilabel/bibtex.bz2"
 )
 
-def load_youtube_dataset() -> Bunch:
+
+def load_dataset(url: str) -> Bunch:
     """
-    Loads youtube deepwalk multilabel classification dataset.
+    Load a given multilabel dataset by fetching it from a given url.
+
+    Args:
+        url (str): URL to download the dataset from.
 
     Returns:
-        Bunch: Sklearn Bunch with xs as data and ys as labels.
+        Bunch: Sklearn Bunch containing data and labels.
     """
-    extracted_path = "bibtex.svm"
+    extracted_path = url.split("/")[-1].split(".")[0] + ".svm"
 
     if not os.path.exists(extracted_path):
-        logger.info("Youtube dataset not found, downloading and decompressing in memory...")
+        logger.info("Dataset not found locally, downloading...")
 
-        response = requests.get(BIBTEX_DATASET_URL, stream=True, verify=False)
+        response = requests.get(url, stream=True, verify=False, timeout=10)
         response.raise_for_status()
 
         total_size = int(response.headers.get("content-length", 0))
@@ -50,31 +54,44 @@ def load_youtube_dataset() -> Bunch:
             unit="B",
             unit_scale=True,
             unit_divisor=1024,
-        ) as bar:
+        ) as progress_bar:
             for chunk in response.iter_content(chunk_size=8192):
                 compressed_data.write(chunk)
-                bar.update(len(chunk))
+                progress_bar.update(len(chunk))
 
         compressed_data.seek(0)
         decompressed_data = bz2.decompress(compressed_data.read())
 
         with open(extracted_path, "wb") as f_out:
             f_out.write(decompressed_data)
+
         logger.info("Decompression complete.")
     else:
         logger.info("Found decompressed dataset.")
 
     logger.info("Loading dataset...")
+
+    # pylint: disable=unbalanced-tuple-unpacking
     x, y = load_svmlight_file(extracted_path, multilabel=True)
 
     return Bunch(data=x, target=y)
 
 
-if __name__ == "__main__":
-    dataset = load_youtube_dataset()
-    logger.info(f"Dataset loaded with shape: {dataset.data.shape}, {len(dataset.target)} samples.")
+def load_youtube_dataset() -> Bunch:
+    """
+    Load youtube deepwalk multilabel dataset.
 
-    for i, (x, y) in enumerate(zip(dataset.data, dataset.target)):
-        logger.debug(f"Sample {i}:\nData: {x}\nLabels: {y}")
-        if i > 0:
-            break
+    Returns:
+        Bunch: Sklearn Bunch containing dataset data and labels.
+    """
+    return load_dataset(YOUTUBE_DATASET_URL)
+
+
+def load_bibtex_dataset() -> Bunch:
+    """
+    Load Bibtex multilabel dataset.
+
+    Returns:
+        Bunch: Sklearn Bunch containing dataset data and labels.
+    """
+    return load_dataset(BIBTEX_DATASET_URL)

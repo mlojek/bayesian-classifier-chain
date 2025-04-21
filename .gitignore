@@ -1,5 +1,6 @@
 # project-specific
 *.bz2
+*.svm
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
