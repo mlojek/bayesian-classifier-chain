@@ -1,4 +1,5 @@
-# machine learning
+# core
+jupyter
 scikit-learn
 scikit-multilearn
 optuna
