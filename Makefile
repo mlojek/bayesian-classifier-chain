@@ -14,3 +14,7 @@ check: format
 	black ${all_code} --check
 	isort ${all_code} --check --profile black
 	pylint ${all_code}
+
+doc:
+	sphinx-apidoc -o docs src/ -f
+	make -C docs html
