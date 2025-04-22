@@ -1,4 +1,4 @@
-all_code = src/**/*.py
+all_code = $(shell find src/ -type f -name '*.py')
 
 install:
 	pip install -r requirements.txt
