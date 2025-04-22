@@ -1,7 +1,9 @@
-# machine learning
+# core
+jupyter
 scikit-learn
 scikit-multilearn
 optuna
+xgboost
 
 # static code analysis
 black

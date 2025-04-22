@@ -9,6 +9,7 @@ import os
 
 import requests
 from sklearn.datasets import load_svmlight_file
+from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.utils import Bunch
 from tqdm import tqdm
 
@@ -73,6 +74,9 @@ def load_dataset(url: str) -> Bunch:
 
     # pylint: disable=unbalanced-tuple-unpacking
     x, y = load_svmlight_file(extracted_path, multilabel=True)
+
+    label_binarizer = MultiLabelBinarizer()
+    y = label_binarizer.fit_transform(y)
 
     return Bunch(data=x, target=y)
 

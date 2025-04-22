@@ -1,4 +1,4 @@
-all_code = src/**/*.py
+all_code = $(shell find src/ -type f -name '*.py')
 
 install:
 	pip install -r requirements.txt
@@ -14,3 +14,7 @@ check: format
 	black ${all_code} --check
 	isort ${all_code} --check --profile black
 	pylint ${all_code}
+
+doc:
+	sphinx-apidoc -o docs src/ -f
+	make -C docs html
