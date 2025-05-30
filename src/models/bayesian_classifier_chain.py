@@ -37,7 +37,7 @@ class BayesianClassifierChain:
             features (List[List[float]]): Dataset features.
             labels (List[List[float]]): Dataset labels.
         """
-        features = np.array(features)
+        features = features.toarray()
         labels = np.array(labels)
 
         self.n_labels = labels.shape[1]
@@ -64,7 +64,7 @@ class BayesianClassifierChain:
         Returns:
             List[List[int]]: Predicted dataset labels.
         """
-        features = np.array(features)
+        features = features.toarray()
         predicted_labels = np.zeros((features.shape[0], self.n_labels))
 
         features_extended = features.copy()
