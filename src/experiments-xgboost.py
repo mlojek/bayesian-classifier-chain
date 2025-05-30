@@ -3,10 +3,12 @@ from models.bayesian_classifier_chain import BayesianClassifierChain
 from xgboost import XGBClassifier
 from sklearn.model_selection import train_test_split
 
-randomnessSeed = 0
+classifier_random_seed = 0
+data_split_random_seed = 0
+test_set_size = 0.1
 
 testClassifier = XGBClassifier(
-    objective="binary:logistic", random_state=randomnessSeed)
+    objective="binary:logistic", random_state=classifier_random_seed)
 
 # this could be useful when comparing bayesian chain of xgboost to just running xgboost in multilabel mode
 # testClassifier = XGBClassifier(
@@ -17,7 +19,7 @@ loaded_dataset = load_youtube_dataset()
 X = loaded_dataset.data
 Y = loaded_dataset.target
 X_train, X_test, y_train, y_test = train_test_split(
-    X, Y, test_size=0.8, random_state=0)
+    X, Y, test_size=test_set_size, random_state=data_split_random_seed)
 
 testChain.fit(X_train, y_train)
 results = testChain.evaluate(X_test, y_test)

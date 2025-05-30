@@ -3,15 +3,18 @@ from models.bayesian_classifier_chain import BayesianClassifierChain
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 
-randomnessSeed = 0
-testClassifier = LogisticRegression(random_state=randomnessSeed)
+classifier_random_seed = 0
+data_split_random_seed = 0
+test_set_size = 0.1
+
+testClassifier = LogisticRegression(random_state=classifier_random_seed)
 testChain = BayesianClassifierChain(classifier=testClassifier)
 
 loaded_dataset = load_youtube_dataset()
 X = loaded_dataset.data
 Y = loaded_dataset.target
 X_train, X_test, y_train, y_test = train_test_split(
-    X, Y, test_size=0.8, random_state=0)
+    X, Y, test_size=test_set_size, random_state=data_split_random_seed)
 
 testChain.fit(X_train, y_train)
 results = testChain.evaluate(X_test, y_test)
