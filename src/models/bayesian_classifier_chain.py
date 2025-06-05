@@ -7,7 +7,7 @@ from typing import Dict, List
 import numpy as np
 from sklearn.base import ClassifierMixin as SklearnClassifier
 from sklearn.base import clone
-from sklearn.metrics import accuracy_score, hamming_loss
+from sklearn.metrics import accuracy_score, hamming_loss, recall_score, precision_score
 
 
 class BayesianClassifierChain:
@@ -94,6 +94,8 @@ class BayesianClassifierChain:
         predicted_labels = self.predict(features)
 
         acc = accuracy_score(labels, predicted_labels)
+        prec = precision_score(labels, predicted_labels)
+        rec = recall_score(labels, predicted_labels)
         hl = hamming_loss(labels, predicted_labels)
 
-        return {"subset_accuracy": acc, "hamming_loss": hl}
+        return {"subset_accuracy": acc, "precision_score": prec, "recall_score": rec, "hamming_loss": hl}
