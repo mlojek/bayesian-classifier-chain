@@ -94,8 +94,8 @@ class BayesianClassifierChain:
         predicted_labels = self.predict(features)
 
         acc = accuracy_score(labels, predicted_labels)
-        prec = precision_score(labels, predicted_labels)
-        rec = recall_score(labels, predicted_labels)
+        prec = precision_score(labels, predicted_labels, average='macro')
+        rec = recall_score(labels, predicted_labels, average='macro')
         hl = hamming_loss(labels, predicted_labels)
 
         return {"subset_accuracy": acc, "precision_score": prec, "recall_score": rec, "hamming_loss": hl}

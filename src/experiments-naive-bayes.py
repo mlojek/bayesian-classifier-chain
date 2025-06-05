@@ -20,3 +20,5 @@ results = testChain.evaluate(X_test, y_test)
 
 print(
     f"subset_accuracy: {results['subset_accuracy']}, hamming_loss: {results['hamming_loss']}")
+print(
+    f"precision_score: {results['precision_score']}, recall_score: {results['recall_score']}")
