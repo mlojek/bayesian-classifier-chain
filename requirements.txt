@@ -13,3 +13,6 @@ pylint
 # documentation
 sphinx
 sphinx-rtd-theme
+
+# experiments
+optilab
