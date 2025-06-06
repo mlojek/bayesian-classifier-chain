@@ -9,11 +9,15 @@ from datasets import load_bibtex_dataset, load_youtube_dataset
 from models.bayesian_classifier_chain import BayesianClassifierChain
 
 
-def find_best_label_order(classifier, x_train, y_train, x_test, y_test):
+
+def find_best_label_order(classifier, x_train, y_train, x_test, y_test, n_samples=100):
     best_found_permutation = None
     best_hamming_loss = np.inf
+    num_labels = np.array(y_train).shape[1]
 
-    for label_permutation in tqdm(permutations(range(np.array(y_train).shape[1]))):
+    for _ in tqdm(range(n_samples), desc="Searching for best label order"):
+        label_permutation = np.random.permutation(num_labels).tolist()
+
         chain = BayesianClassifierChain(
             classifier=classifier, custom_label_order=label_permutation
         )
@@ -24,10 +28,10 @@ def find_best_label_order(classifier, x_train, y_train, x_test, y_test):
         if results["hamming_loss"] < best_hamming_loss:
             best_found_permutation = label_permutation
             best_hamming_loss = results["hamming_loss"]
-
-            print(f"Found new best permuation {best_found_permutation}")
+            print(f"Found new best permutation {best_found_permutation}")
 
     return best_found_permutation
+
 
 
 data_split_random_seed = 0
