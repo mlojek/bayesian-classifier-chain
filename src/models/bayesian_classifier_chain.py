@@ -16,7 +16,7 @@ class BayesianClassifierChain:
     It uses previous labels to predict subsequent labels.
     """
 
-    def __init__(self, classifier: SklearnClassifier):
+    def __init__(self, classifier: SklearnClassifier, custom_label_order: List[int] = None):
         """
         Initializes the classifier chain.
 
@@ -26,6 +26,12 @@ class BayesianClassifierChain:
         self.base_classifier: SklearnClassifier = classifier
         self.classifiers: List[SklearnClassifier] = []
 
+        if custom_label_order is not None and not self.__is_complete_index_sequence(custom_label_order):
+            raise ValueError(
+                f"custom_label_order must contain all integers from 0 to {max(custom_label_order)} "
+                f"without duplicates or gaps. Got: {custom_label_order}"
+            )
+        self.custom_label_order = custom_label_order
         self.label_order: List[int] = []
         self.n_labels: int = 0
 
@@ -41,7 +47,18 @@ class BayesianClassifierChain:
         labels = np.array(labels)
 
         self.n_labels = labels.shape[1]
-        self.label_order = list(range(self.n_labels))
+        if self.custom_label_order is None:
+            # default label order: from first to last as given by 'labels'
+            self.label_order = list(range(self.n_labels))
+        else:
+            # custom label order
+            # check if initialized custom label order is valid for fitted labels
+            if self.n_labels != len(self.custom_label_order):
+                raise ValueError(
+                    f"Mismatch: labels has {labels.shape[1]} columns, "
+                    f"but custom_label_order has {len(self.custom_alabel_order)} columns."
+                )
+            self.label_order = self.custom_label_order
         self.classifiers = []
 
         extended_features = features.copy()
@@ -76,6 +93,15 @@ class BayesianClassifierChain:
                 [features_extended, y_predicted.reshape(-1, 1)]
             )
 
+        # Inverse mapping to restore original order (needed when self.custom_label_order was set in __init__)
+        if self.custom_label_order is not None:
+            # print('custom order of classifiers, inverse mapping')
+            reordered_preds = np.zeros_like(predicted_labels)
+            for idx, label_index in enumerate(self.label_order):
+                reordered_preds[:, label_index] = predicted_labels[:, idx]
+
+            predicted_labels = reordered_preds
+
         return predicted_labels
 
     def evaluate(
@@ -99,3 +125,13 @@ class BayesianClassifierChain:
         hl = hamming_loss(labels, predicted_labels)
 
         return {"subset_accuracy": acc, "precision_score": prec, "recall_score": rec, "hamming_loss": hl}
+
+    def __is_complete_index_sequence(self, custom_label_order):
+        """
+        Checks whether the custom_label_order is valid or not (is a complete set of integers from 0 to some int)
+        """
+        if not custom_label_order:
+            return False
+        max_index = max(custom_label_order)
+        expected_set = set(range(max_index + 1))
+        return set(custom_label_order) == expected_set
