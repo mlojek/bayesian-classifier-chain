@@ -1,7 +1,8 @@
-from datasets import load_youtube_dataset, load_bibtex_dataset
-from models.bayesian_classifier_chain import BayesianClassifierChain
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
+
+from datasets import load_bibtex_dataset, load_youtube_dataset
+from models.bayesian_classifier_chain import BayesianClassifierChain
 
 classifier_random_seed = 0
 data_split_random_seed = 0
@@ -14,10 +15,15 @@ loaded_dataset = load_youtube_dataset()
 X = loaded_dataset.data
 Y = loaded_dataset.target
 X_train, X_test, y_train, y_test = train_test_split(
-    X, Y, test_size=test_set_size, random_state=data_split_random_seed)
+    X,
+    Y,
+    test_size=test_set_size,
+    random_state=data_split_random_seed,
+)
 
 testChain.fit(X_train, y_train)
 results = testChain.evaluate(X_test, y_test)
 
 print(
-    f"subset_accuracy: {results['subset_accuracy']}, hamming_loss: {results['hamming_loss']}")
+    f"subset_accuracy: {results['subset_accuracy']}, hamming_loss: {results['hamming_loss']}"
+)

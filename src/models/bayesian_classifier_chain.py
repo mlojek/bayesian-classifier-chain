@@ -7,7 +7,7 @@ from typing import Dict, List
 import numpy as np
 from sklearn.base import ClassifierMixin as SklearnClassifier
 from sklearn.base import clone
-from sklearn.metrics import accuracy_score, hamming_loss, recall_score, precision_score
+from sklearn.metrics import accuracy_score, hamming_loss, precision_score, recall_score
 
 
 class BayesianClassifierChain:
@@ -16,7 +16,9 @@ class BayesianClassifierChain:
     It uses previous labels to predict subsequent labels.
     """
 
-    def __init__(self, classifier: SklearnClassifier, custom_label_order: List[int] = None):
+    def __init__(
+        self, classifier: SklearnClassifier, custom_label_order: List[int] = None
+    ):
         """
         Initializes the classifier chain.
 
@@ -26,7 +28,9 @@ class BayesianClassifierChain:
         self.base_classifier: SklearnClassifier = classifier
         self.classifiers: List[SklearnClassifier] = []
 
-        if custom_label_order is not None and not self.__is_complete_index_sequence(custom_label_order):
+        if custom_label_order is not None and not self.__is_complete_index_sequence(
+            custom_label_order
+        ):
             raise ValueError(
                 f"custom_label_order must contain all integers from 0 to {max(custom_label_order)} "
                 f"without duplicates or gaps. Got: {custom_label_order}"
@@ -120,11 +124,16 @@ class BayesianClassifierChain:
         predicted_labels = self.predict(features)
 
         acc = accuracy_score(labels, predicted_labels)
-        prec = precision_score(labels, predicted_labels, average='macro')
-        rec = recall_score(labels, predicted_labels, average='macro')
+        prec = precision_score(labels, predicted_labels, average="macro")
+        rec = recall_score(labels, predicted_labels, average="macro")
         hl = hamming_loss(labels, predicted_labels)
 
-        return {"subset_accuracy": acc, "precision_score": prec, "recall_score": rec, "hamming_loss": hl}
+        return {
+            "subset_accuracy": acc,
+            "precision_score": prec,
+            "recall_score": rec,
+            "hamming_loss": hl,
+        }
 
     def __is_complete_index_sequence(self, custom_label_order):
         """
