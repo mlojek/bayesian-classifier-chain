@@ -60,7 +60,7 @@ class BayesianClassifierChain:
             if self.n_labels != len(self.custom_label_order):
                 raise ValueError(
                     f"Mismatch: labels has {labels.shape[1]} columns, "
-                    f"but custom_label_order has {len(self.custom_alabel_order)} columns."
+                    f"but custom_label_order has {len(self.custom_label_order)} columns."
                 )
             self.label_order = self.custom_label_order
         self.classifiers = []
