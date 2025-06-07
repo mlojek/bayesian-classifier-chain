@@ -1,16 +1,32 @@
-from itertools import permutations
+"""
+Experiment to find the best label order in the Bayesian Classifier Chain
+by randomly sampling N label orders.
+"""
+
+import argparse
 
 import numpy as np
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import GaussianNB
 from tqdm import tqdm
+from xgboost import XGBClassifier
 
 from datasets import load_bibtex_dataset, load_youtube_dataset
 from models.bayesian_classifier_chain import BayesianClassifierChain
 
 
-
-def find_best_label_order(classifier, x_train, y_train, x_test, y_test, n_samples=100):
+def find_best_label_order(
+    classifier,
+    x_train,
+    y_train,
+    x_test,
+    y_test,
+    n_samples=100,
+):
+    """
+    TODO docstring
+    """
     best_found_permutation = None
     best_hamming_loss = np.inf
     num_labels = np.array(y_train).shape[1]
@@ -33,39 +49,69 @@ def find_best_label_order(classifier, x_train, y_train, x_test, y_test, n_sample
     return best_found_permutation
 
 
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "dataset",
+        choices=["youtube", "bibtex"],
+        help="Multilabel classification dataset to use.",
+    )
+    parser.add_argument(
+        "classifier",
+        choices=["xgboost", "naive_bayes", "logistic_regression"],
+        help="Classifier to use in the chain.",
+    )
+    parser.add_argument(
+        "num_samples",
+        type=int,
+        help="Number of random orders to check.",
+    )
+    args = parser.parse_args()
 
-data_split_random_seed = 0
-test_set_size = 0.1
+    # constants
+    RANDOM_SEED = 0
+    TEST_SIZE = 0.1
 
-loaded_dataset = load_youtube_dataset()
-X = loaded_dataset.data
-Y = loaded_dataset.target
-X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    Y,
-    test_size=test_set_size,
-    random_state=data_split_random_seed,
-)
+    # load the dataset
+    match args.dataset:
+        case "youtube":
+            loaded_dataset = load_youtube_dataset()
+        case "bibtex":
+            loaded_dataset = load_bibtex_dataset()
+        case _:
+            raise ValueError(f"Invalid dataset name {args.dataset}!")
 
-# custom_label_order = list(range((np.array(y_train)).shape[1]))
-# temp = custom_label_order[3]
-# custom_label_order[3] = custom_label_order[10]
-# custom_label_order[10] = temp
-# custom_label_order.reverse()
+    # split the dataset into train and test parts
+    X = loaded_dataset.data
+    Y = loaded_dataset.target
+    X_train, X_test, y_train, y_test = train_test_split(
+        X,
+        Y,
+        test_size=TEST_SIZE,
+        random_state=RANDOM_SEED,
+    )
 
-testClassifier = GaussianNB()
-find_best_label_order(testClassifier, X_train, y_train, X_test, y_test)
-# testChain = BayesianClassifierChain(
-#     classifier=testClassifier,
-#     custom_label_order=custom_label_order,
-# )
+    # create the classifier
+    match args.classifier:
+        case "xgboost":
+            testClassifier = XGBClassifier(
+                objective="binary:logistic",
+                random_state=RANDOM_SEED,
+            )
+        case "naive_bayes":
+            testClassifier = GaussianNB()
+        case "logistic_regression":
+            testClassifier = LogisticRegression(random_state=RANDOM_SEED)
+        case _:
+            raise ValueError(f"Invalid classifier name {args.classifier}!")
 
-# testChain.fit(X_train, y_train)
-# results = testChain.evaluate(X_test, y_test)
-
-# print(
-#     f"subset_accuracy: {results['subset_accuracy']}, hamming_loss: {results['hamming_loss']}"
-# )
-# print(
-#     f"precision_score: {results['precision_score']}, recall_score: {results['recall_score']}"
-# )
+    # perform the experiment
+    best_found = find_best_label_order(
+        testClassifier,
+        X_train,
+        y_train,
+        X_test,
+        y_test,
+        n_samples=args.num_samples,
+    )
+    print(best_found)
