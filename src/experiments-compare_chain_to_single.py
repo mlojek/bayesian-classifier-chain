@@ -13,6 +13,8 @@ perform_best_label_order_search = False
 # przeprowadzone 25 iteracji, w wersji "szybkiej" notatnika ustawione na 2
 EXPERIMENT_ITERATIONS_COUNT = 1
 
+load_dataset_function = load_youtube_dataset
+
 #!python src/experiments-xgboost.py
 if not perform_best_label_order_search:
     classifier_random_seed = 0
@@ -30,7 +32,7 @@ if not perform_best_label_order_search:
     # testClassifier = GaussianNB()
     # bestChainXGBoostBT = BayesianClassifierChain(classifier=testClassifier)
 
-    loaded_dataset = load_youtube_dataset()
+    loaded_dataset = load_dataset_function()
     X = loaded_dataset.data
     Y = loaded_dataset.target
     X_train, X_test, y_train, y_test = train_test_split(
@@ -44,12 +46,12 @@ if not perform_best_label_order_search:
 
 # perform comparison experiments
 classifier_chain = bestChainXGBoostBT
-single_classifier = XGBClassifier(
-    objective="binary:logistic", random_state=classifier_random_seed)
+single_classifier = testClassifier
+# single_classifier = XGBClassifier(
+#     objective="binary:logistic", random_state=classifier_random_seed)
 # single_classifier = GaussianNB()
 
 iterations_count = EXPERIMENT_ITERATIONS_COUNT
-load_dataset_function = load_youtube_dataset
 test_set_size = 0.1
 series_results_xgb_bt = perform_train_evaluate_chain_vs_single(
     classifier_chain=classifier_chain, single_classifier=single_classifier, iterations_count=iterations_count, load_dataset_function=load_dataset_function, test_set_size=test_set_size)
