@@ -58,7 +58,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "classifier",
-        choices=["xgboost", "naive_bayes", "logistic_regression"],
+        choices=["xgboost_hinge", "xgboost_logistic", "naive_bayes", "logistic_regression"],
         help="Classifier to use in the chain.",
     )
     parser.add_argument(
@@ -93,9 +93,14 @@ if __name__ == "__main__":
 
     # create the classifier
     match args.classifier:
-        case "xgboost":
+        case "xgboost_logistic":
             testClassifier = XGBClassifier(
                 objective="binary:logistic",
+                random_state=RANDOM_SEED,
+            )
+        case "xgboost_hinge":
+            testClassifier = XGBClassifier(
+                objective="binary:hinge",
                 random_state=RANDOM_SEED,
             )
         case "naive_bayes":
